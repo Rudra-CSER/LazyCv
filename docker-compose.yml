@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+
+  backend:
+    image: ghcr.io/rudra-cser/lazycv-backend:latest
+    container_name: lazycv_backend
+    restart: unless-stopped
+    environment:
+      MONGO_URI:   ${MONGO_URI}
+      JWT_SECRET:  ${JWT_SECRET}
+      OPENAI_KEY:  ${OPENAI_KEY}
+      PORT:        3000
+    expose:
+      - "3000"        # only reachable inside the Docker network
+    networks:
+      - lazycv_net
+
+  frontend:
+    image: ghcr.io/rudra-cser/lazycv-frontend:latest
+    container_name: lazycv_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"       # public HTTP; point your domain / Nginx reverse-proxy here
+    depends_on:
+      - backend
+    networks:
+      - lazycv_net
+
+networks:
+  lazycv_net:
+    driver: bridge
