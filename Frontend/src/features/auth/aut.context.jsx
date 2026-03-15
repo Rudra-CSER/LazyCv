@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import { getMe, logout } from "./services/auth.api.js";
+import { getMe } from "./services/auth.api.js";
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext();
 
@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
         const closedAt = localStorage.getItem(CLOSED_AT_KEY);
         if (closedAt && Date.now() - Number(closedAt) >= SESSION_TIMEOUT_MS) {
           localStorage.removeItem(CLOSED_AT_KEY);
-          await logout().catch(() => {});
+          localStorage.removeItem("lazycv_token");
           setUser(null);
           return;
         }
