@@ -1,0 +1,50 @@
+@use "./styles/button.scss";
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html, body,#root{
+    width: 100%;
+    height: 100%;
+    background: #080d0b;
+    font-family: 'Poppins', sans-serif;
+    color: aliceblue;
+}
+.highlight{
+    color: #00ff8895;
+}
+
+// ── Global webkit scrollbar ────────────────────────────────────────
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 255, 136, 0.35),
+    rgba(0, 229, 255, 0.2)
+  );
+  border-radius: 999px;
+  border: 1px solid rgba(0, 255, 136, 0.08);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 255, 136, 0.65),
+    rgba(0, 229, 255, 0.45)
+  );
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+// Explicit page-level scrollbar (document scroll on html/body)
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 136, 0.35) transparent;
+}

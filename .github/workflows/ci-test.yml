@@ -1,0 +1,171 @@
+name: CI — Test / Staging
+
+on:
+  push:
+    branches: [test]
+  pull_request:
+    branches: [test]
+
+jobs:
+  # ────────────────────────────────────────────────────────
+  # SMOKE TESTS
+  # ────────────────────────────────────────────────────────
+  smoke-test:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    env:
+      MONGO_URI:  ${{ secrets.TEST_MONGO_URI }}
+      JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
+      OPENAI_KEY: ${{ secrets.TEST_OPENAI_KEY }}
+      PORT:       3001
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: Backend
+
+      - name: Start backend server
+        run: node server.js &
+        working-directory: Backend
+
+      - name: Wait for server to be ready
+        run: npx wait-on@7 http://localhost:3001/api/auth/me --timeout 20000 || true
+
+      # ── Auth smoke tests ──────────────────────────────────
+      - name: SMOKE — Register new user
+        run: |
+          RESP=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3001/api/auth/register \
+            -H "Content-Type: application/json" \
+            -d '{"username":"smokeuser","email":"smoke@lazycv.test","password":"Smoke1234!"}')
+          CODE=$(echo "$RESP" | tail -1)
+          BODY=$(echo "$RESP" | head -1)
+          echo "Status: $CODE | Body: $BODY"
+          [ "$CODE" = "201" ] && echo "✓ PASS: register" || (echo "✗ FAIL: register" && exit 1)
+
+      - name: SMOKE — Login with correct credentials
+        run: |
+          RESP=$(curl -s -w "\n%{http_code}" -c /tmp/smoke_cookies.txt \
+            -X POST http://localhost:3001/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"smoke@lazycv.test","password":"Smoke1234!"}')
+          CODE=$(echo "$RESP" | tail -1)
+          BODY=$(echo "$RESP" | head -1)
+          echo "Status: $CODE | Body: $BODY"
+          [ "$CODE" = "200" ] && echo "✓ PASS: login" || (echo "✗ FAIL: login" && exit 1)
+
+      - name: SMOKE — Login with wrong password returns 400
+        run: |
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST http://localhost:3001/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"smoke@lazycv.test","password":"WrongPass!"}')
+          echo "Status: $CODE"
+          [ "$CODE" = "400" ] && echo "✓ PASS: wrong password returns 400" || (echo "✗ FAIL" && exit 1)
+
+      - name: SMOKE — get-me returns user (cookie round-trip)
+        run: |
+          RESP=$(curl -s -w "\n%{http_code}" -b /tmp/smoke_cookies.txt \
+            http://localhost:3001/api/auth/get-me)
+          CODE=$(echo "$RESP" | tail -1)
+          BODY=$(echo "$RESP" | head -1)
+          echo "Status: $CODE | Body: $BODY"
+          [ "$CODE" = "200" ] && echo "✓ PASS: get-me" || (echo "✗ FAIL: get-me" && exit 1)
+
+      - name: SMOKE — get-me without cookie returns 401
+        run: |
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://localhost:3001/api/auth/get-me)
+          echo "Status: $CODE"
+          [ "$CODE" = "401" ] && echo "✓ PASS: 401 without cookie" || (echo "✗ FAIL" && exit 1)
+
+      - name: SMOKE — Reports list returns empty array
+        run: |
+          RESP=$(curl -s -w "\n%{http_code}" -b /tmp/smoke_cookies.txt \
+            http://localhost:3001/api/interview)
+          CODE=$(echo "$RESP" | tail -1)
+          BODY=$(echo "$RESP" | head -1)
+          echo "Status: $CODE | Body: $BODY"
+          [ "$CODE" = "200" ] && echo "✓ PASS: reports list" || (echo "✗ FAIL: reports list" && exit 1)
+
+      - name: SMOKE — Logout blacklists token
+        run: |
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" -b /tmp/smoke_cookies.txt \
+            http://localhost:3001/api/auth/logout)
+          echo "Status: $CODE"
+          [ "$CODE" = "200" ] && echo "✓ PASS: logout" || (echo "✗ FAIL: logout" && exit 1)
+
+      - name: SMOKE — get-me after logout returns 401 (token blacklisted)
+        run: |
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" -b /tmp/smoke_cookies.txt \
+            http://localhost:3001/api/auth/get-me)
+          echo "Status: $CODE"
+          [ "$CODE" = "401" ] && echo "✓ PASS: blacklisted token rejected" || (echo "✗ FAIL: token not blacklisted" && exit 1)
+
+      # ── Frontend build smoke ──────────────────────────────
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: Frontend
+
+      - name: SMOKE — Frontend builds without errors
+        run: npm run build
+        working-directory: Frontend
+        env:
+          VITE_API_URL: http://localhost:3001
+
+  # ────────────────────────────────────────────────────────
+  # STRESS TESTS (k6) — only runs after smoke passes
+  # ────────────────────────────────────────────────────────
+  stress-test:
+    name: Stress Tests (k6)
+    runs-on: ubuntu-latest
+    needs: smoke-test
+    env:
+      MONGO_URI:  ${{ secrets.TEST_MONGO_URI }}
+      JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
+      OPENAI_KEY: ${{ secrets.TEST_OPENAI_KEY }}
+      PORT:       3001
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: Backend
+
+      - name: Install k6
+        run: |
+          curl -L https://github.com/grafana/k6/releases/download/v0.53.0/k6-v0.53.0-linux-amd64.tar.gz | tar xvz
+          sudo mv k6-v0.53.0-linux-amd64/k6 /usr/local/bin/k6
+
+      - name: Start backend server
+        run: node server.js &
+        working-directory: Backend
+
+      - name: Wait for server
+        run: npx wait-on@7 http://localhost:3001/api/auth/me --timeout 20000 || true
+
+      - name: Run k6 auth stress test
+        run: k6 run tests/stress/auth-load.js
+
+      - name: Run k6 read-path stress test
+        run: k6 run tests/stress/read-load.js

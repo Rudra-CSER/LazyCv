@@ -1,0 +1,140 @@
+{
+  "_id": {
+    "$oid": "69af1eab0fd56274cd585637"
+  },
+  "jobDescription": "We are looking for a motivated MERN Stack Developer to build and maintain scalable web applications using MongoDB, Express.js, React, and Node.js. The candidate should write clean code, collaborate with teams, develop RESTful APIs, and contribute to improving application performance and user experience.\n",
+  "resumeText": "Rudra Narayan Mondal\nrudranarayanmondal20@gmail.com GitHub LinkedIn Mobile: +91-8617555355\nProfessional Summary\nB.Tech Computer Science student with hands-on experience in full-stack and AI-enabled applications. Skilled in building\nscalable web solutions using React, Node.js, and REST APIs, with exposure to NLP-based sentiment analysis. Strong team\ncollaborator with hackathon experience, seeking technology consulting or software roles.\nAcademic Projects\n• MyMacBookStyle Portfolio – GitHub, Live\nInteractive macOS-inspired portfolio using React, Vite, and Sass. Features include draggable UI components, terminal\nemulator, markdown support with syntax highlighting, and production-ready deployment on Render..\n• Jarvis Ai bot – GitHub ,live\nDeveloped a MERN-based voice assistant to enable hands-free user interaction, integrating speech-to-text and\nAI-generated responses using GPT-3.5, Deepgram, and ElevenLabs. Improved user accessibility and response automation\nthrough real-time voice processing.\n• TechnoThon Project – Travel and Tourism – GitHub, Live\nTourist travel portal created using HTML,CSS,JS.\n• Football Sentiment Tracker\nBuilt using Flask, Twitter API, Transformers, Redis, Celery, Chart.js. Fetches football tweets, analyzes sentiments via\nNLP. Background tasks via Celery and Redis; visualization via Chart.js.\nSkills Summary\n• Programming:Python, JavaScript, C++, SQL\n• Web Technologies: React, Next.js, Node.js, REST APIs\n• Databases: MongoDB, MySQL\n• AI / Analytics: NLP, Sentiment Analysis, Transformers\n• Tools ’ Platforms: Git, Linux, Vercel, Render, IBM Cloud\nEducation\n• Techno India University, Kolkata, India Nov 2023 – June 2026\nB.Tech in CSE\n• Sheikhpara ARM Polytechnic, Murshidabad, India Sept 2020 – June 2023\nDiploma in Computer Software Engineering\n• NIOS (Netaji Subhas DAV), Murshidabad, India July 2021 – June 2022\nSenior Secondary Education\n• Iswar Chandra Institution (WBBSE) Feb 2013 – Feb 2020\nSecondary Education\nCertifications\n• JavaScript Algorithms and Data Structures – freeCodeCamp (2025)\n• Industrial Training Certificate – Ardent Computech Pvt. Ltd. (2022)\n• Build Real World AI Applications with Gemini and Imagen Skill Badge – Google Cloud (2025)\nExtra-Curricular Achievements\n• Hackathon Participant – TechnoThon (June 2024)\nCollaborated with a team to design and develop Travel and Tourism website under time constraints.\n• Lead, Chitrakatha – Official Film Society of TIU (Apr 2025 – Present)\n• Coordinator, Chitraka – Official Photography Club of TIU (Apr 2024 – Present)\n• Member, Vivarta – Technical Club of TIU (Apr 2025 – Present)\n\n-- 1 of 1 --\n\n",
+  "selfDescription": "I am a passionate MERN stack developer with strong skills in JavaScript, React, Node.js, Express, and MongoDB. I enjoy building scalable web applications and continuously improving my problem-solving abilities through real-world projects and DSA practice.\n",
+  "matchScore": 88,
+  "technicalQuestions": [
+    {
+      "question": "Explain your MERN stack experience through the Jarvis AI Bot project. What were the key components, how did you design the RESTful APIs, and what tooling did you use for backend and data handling?",
+      "intention": "Assess hands-on MERN expertise, API design discipline, and ability to articulate architecture decisions.",
+      "answer": "Discuss Express.js backend structure, RESTful endpoints for core features (e.g., user auth, command processing, speech-to-text workflow, AI response integration). Mention data modeling with MongoDB (schemas, relationships, indexing), middleware usage (auth, validation), and error handling. Highlight API design considerations: resource modeling, HTTP verbs, status codes, versioning, pagination if needed, and security (JWT or session-based auth). Describe integration points with front-end (React) and with external services (GPT-3.5, Deepgram, ElevenLabs) and how you managed asynchronous flows, streaming, and rate limits. Mention deployment (Render/Vercel) and environment separation (dev/stage/prod). Emphasize testing approaches (unit/integration) and monitoring/logging."
+    },
+    {
+      "question": "What strategies do you use to ensure performance and scalability in a MERN application, and can you share examples from your projects?",
+      "intention": "Evaluate knowledge of performance optimization and scalability in full-stack apps.",
+      "answer": "Cover backend optimizations: indexing MongoDB collections, query profiling, avoiding N+1 patterns, using aggregation pipelines, and caching layers (e.g., Redis). Frontend: code-splitting, lazy loading, memoization, and efficient state management. Discuss scalable deployment practices (cluster mode, PM2, stateless services, CDN for assets). Mention observability (logs, metrics, tracing) and load-testing approaches. Reference concrete examples from Jarvis Bot or Football Sentiment Tracker where you addressed latency, throughput, or resource usage."
+    },
+    {
+      "question": "Describe a challenging bug you faced in a MERN project and how you resolved it.",
+      "intention": "Gauge problem-solving, debugging methodology, and resilience.",
+      "answer": "Provide a real scenario (e.g., a race condition in async API calls or a mismatch between front-end state and backend data). Outline steps: reproduce, instrument with logs or breakpoints, isolate root cause, implement fix with minimal disruption, add tests to prevent recurrence, and verify through end-to-end checks. Highlight collaboration, root-cause analysis, and validation in staging before production."
+    },
+    {
+      "question": "How would you design a RESTful API for a new feature in a MERN-based product? Walk me through resource modeling, endpoints, and security considerations.",
+      "intention": "Assess API design strengths and ability to reason about maintainable APIs.",
+      "answer": "Start with identifying resources and relationships, define endpoints with clear nouns (e.g., /api/users, /api/trips, /api/trips/:id/reviews). Choose HTTP verbs appropriately, apply pagination, filtering, and sorting where needed. Implement authentication/authorization (JWT, token scopes), input validation, and error handling with consistent response shapes. Consider versioning (v1) and documentation (OpenAPI/Swagger). Mention rate limiting, input sanitization, and robust error messages."
+    },
+    {
+      "question": "Explain how you handle authentication and authorization in MERN apps. Which patterns and libraries did you use?",
+      "intention": "Evaluate security awareness and practical implementation skills.",
+      "answer": "Describe using JSON Web Tokens or session-based authentication, including access and refresh tokens, token storage considerations on the client, and rotation strategies. Discuss role-based access control, protecting routes on both frontend and backend, and securing APIs against common threats (CSRF, XSS). Mention secure password storage (bcrypt), and any OAuth integration if applicable. Provide examples from projects where you secured sensitive endpoints."
+    },
+    {
+      "question": "What testing strategies and tools do you rely on for MERN applications? Which parts of the stack do you test, and how do you integrate testing into CI/CD?",
+      "intention": "Understand testing discipline and CI/CD alignment.",
+      "answer": "Outline unit tests for backend logic (Jest, Mocha), API tests with Supertest, and frontend tests (Jest + React Testing Library). Mention end-to-end testing (Cypress) for critical flows. Discuss test coverage goals and mocking/stubbing strategies. Describe how tests run in CI (GitHub Actions, GitLab CI) and how you gate deployments with failing tests. Provide examples from past projects where tests helped catch regressions."
+    }
+  ],
+  "behavioralQuestions": [
+    {
+      "question": "Tell me about a time you shipped a MERN project under a tight deadline. How did you collaborate with your team and what was the outcome?",
+      "intention": "Assess teamwork, time management, and delivery under pressure.",
+      "answer": "Describe the situation, your role, the plan you proposed, and prioritization decisions. Highlight collaboration with teammates (task delegation, code reviews, stand-ups), risk management, and how you maintained code quality (linting, tests). Conclude with the result and any learnings for future projects."
+    },
+    {
+      "question": "Describe a technical disagreement within your team and how you reached a resolution.",
+      "intention": "Gauge communication, conflict resolution, and collaborative problem-solving.",
+      "answer": "Explain the context, the differing viewpoints, and the data or experiments you used to evaluate options. Emphasize listening, keeping the user's needs in focus, and a constructive compromise or consensus. Mention outcomes and any process improvements to prevent similar conflicts."
+    },
+    {
+      "question": "How do you approach learning a new technology or framework quickly for a project?",
+      "intention": "Understand adaptability and self-directed learning.",
+      "answer": "Outline a structured approach: scope the requirements, identify core concepts, build a small prototype, consult documentation and example projects, seek feedback from peers, and apply the learning to the main project. Emphasize time-boxing and practical outcomes."
+    },
+    {
+      "question": "Can you give an example of improving user experience or performance in a project you worked on?",
+      "intention": "Evaluate impact-oriented thinking and user-centric development.",
+      "answer": "Describe the problem, the metrics used (e.g., load time, responsiveness), the concrete changes you made (frontend optimizations, API improvements, caching), and the measurable impact (reduced latency, better UX). Mention any user feedback or A/B testing results."
+    },
+    {
+      "question": "What motivates you to work on MERN stack projects, and how do you stay current with evolving web technologies?",
+      "intention": "Gauge passion, ongoing learning, and alignment with the role.",
+      "answer": "Highlight interests in full-stack development, AI-enabled features, and building scalable apps. Mention continuous learning habits (projects, courses, reading, community involvement), and how you apply new knowledge to real-world problems (e.g., incorporating new APIs or libraries into projects)."
+    }
+  ],
+  "skillGaps": {
+    "skill": "TypeScript usage and strict typing in the MERN stack",
+    "severity": "medium"
+  },
+  "preparationPlan": [
+    {
+      "day": 1,
+      "focus": "MERN fundamentals review and project recap",
+      "task": "Revisit Rudra's Jarvis AI Bot and MyMacBookStyle Portfolio code; summarize architecture decisions, data models, and REST API endpoints. Prepare a 2-minute elevator pitch highlighting MERN strengths and key learnings.",
+      "_id": {
+        "$oid": "69af1eab0fd56274cd585638"
+      }
+    },
+    {
+      "day": 2,
+      "focus": "API design and backend robustness",
+      "task": "Design a sample REST API for a feature (e.g., user-generated travel reviews): define resources, endpoints, authentication, validation, and error handling. Implement a small Express route skeleton and a MongoDB schema. Document with a simple API spec.",
+      "_id": {
+        "$oid": "69af1eab0fd56274cd585639"
+      }
+    },
+    {
+      "day": 3,
+      "focus": "Performance, scalability, and security fundamentals",
+      "task": "Review MongoDB indexing, query optimization, and caching concepts. Implement a simple cache layer prototype (in-memory or Redis) and discuss security best practices (JWT handling, secure cookies, input validation). Prepare talking points with concrete examples from past projects.",
+      "_id": {
+        "$oid": "69af1eab0fd56274cd58563a"
+      }
+    },
+    {
+      "day": 4,
+      "focus": "Frontend optimization and React/Next.js skills",
+      "task": "Practice code-splitting, lazy loading, and component memoization. Build a mini React component demonstrating performance improvements and accessibility considerations. Review Next.js routing and data fetching patterns.",
+      "_id": {
+        "$oid": "69af1eab0fd56274cd58563b"
+      }
+    },
+    {
+      "day": 5,
+      "focus": "Testing and CI/CD basics",
+      "task": "Set up a basic Jest/Supertest test suite for the API and a Cypress end-to-end test for a critical user flow. Outline a GitHub Actions workflow for running tests and deploying to Render/Vercel. Create a checklist for code quality and reviews.",
+      "_id": {
+        "$oid": "69af1eab0fd56274cd58563c"
+      }
+    },
+    {
+      "day": 6,
+      "focus": "System design and architecture planning",
+      "task": "Draft a scalable MERN architecture for a multi-tenant web app. Include data modeling, API gateway, stateless services, deployment strategy, monitoring, and observability considerations. Prepare diagrams or bullet points for quick explanations.",
+      "_id": {
+        "$oid": "69af1eab0fd56274cd58563d"
+      }
+    },
+    {
+      "day": 7,
+      "focus": "Mock interviews and behavioral prep",
+      "task": "Conduct 2 mock interviews focusing on technical and behavioral questions. Refine responses, quantify impact, and practice concise storytelling. Gather feedback and adjust talking points and project anecdotes.",
+      "_id": {
+        "$oid": "69af1eab0fd56274cd58563e"
+      }
+    }
+  ],
+  "user": {
+    "$oid": "69a95c3a5769b4bbac4c93d9"
+  },
+  "createdAt": {
+    "$date": "2026-03-09T19:25:31.689Z"
+  },
+  "updatedAt": {
+    "$date": "2026-03-09T19:25:31.689Z"
+  },
+  "__v": 0
+}
