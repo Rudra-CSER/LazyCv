@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const api = axios.create({
-    baseURL:"",
+    baseURL:"https://lazycv.onrender.com",
     withCredentials:true
 })
 

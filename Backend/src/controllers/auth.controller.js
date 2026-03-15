@@ -6,7 +6,8 @@ const tokenBlacklistModel = require('../models/blacklist.model');
 // Shared cookie options — must be identical for set and clear
 const COOKIE_OPTIONS = {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'none',
+    secure: true,
     maxAge: 24 * 60 * 60 * 1000, // 1 day in ms, matches JWT expiry
     path: '/',
 };
@@ -130,7 +131,7 @@ async function logoutUserController(req, res) {
     }
 
     // Pass matching options so the browser actually removes the cookie
-    res.clearCookie("token", { path: COOKIE_OPTIONS.path, sameSite: COOKIE_OPTIONS.sameSite });
+    res.clearCookie("token", { path: COOKIE_OPTIONS.path, sameSite: COOKIE_OPTIONS.sameSite, secure: COOKIE_OPTIONS.secure });
     res.status(200).json({message: "User Logged Out Successfully"});
 }
 
