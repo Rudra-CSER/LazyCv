@@ -3,7 +3,7 @@ import axios from "axios";
 const TOKEN_KEY = "lazycv_token";
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL ?? "",
+    baseURL: import.meta.env.VITE_API_URL ?? "https://lazycv.onrender.com",
     withCredentials: true
 })
 
