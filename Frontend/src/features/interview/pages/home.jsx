@@ -40,7 +40,8 @@ const Home = () => {
   }, [user?.id]);
 
   const handleGenarateReport = async () => {
-    const resumeFile = resumeInputRef.current.files[0];
+    const fileFromInput = resumeInputRef.current.files[0];
+    const resolvedResumeFile = fileFromInput || resumeFile;
     if (!jobDescription || !selfDescription) {
       return alert("Please fill all the fields");
     }
@@ -49,7 +50,7 @@ const Home = () => {
     const data = await generateReport({
       jobDescription,
       selfDescription,
-      resumeFile,
+      resumeFile: resolvedResumeFile,
     });
     if (!data) {
       setSubmitting(false);

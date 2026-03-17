@@ -57,7 +57,9 @@ export const useInterview = () => {
         const a = document.createElement("a");
         a.href = url;
         a.download = `interview-report-${interviewId}.pdf`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
         return true;
     } catch (error) {
