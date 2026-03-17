@@ -183,6 +183,48 @@ form {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+// ── OTP screen ───────────────────────────────────────────
+.otp-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.otp-icon {
+  font-size: 2rem;
+  color: $green;
+}
+
+.otp-sub {
+  font-size: 0.83rem;
+  color: $text-sub;
+  line-height: 1.55;
+
+  strong { color: $text-primary; }
+}
+
+.otp-input {
+  font-size: 1.6rem !important;
+  letter-spacing: 0.35em;
+  text-align: center;
+  font-weight: 700;
+}
+
+// Plain button that looks like a link
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: $green;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: inherit;
+
+  &:hover { opacity: 0.8; }
+}
+
 // ── Responsive ───────────────────────────────────────────
 @media (max-width: 480px) {
   .from-container {

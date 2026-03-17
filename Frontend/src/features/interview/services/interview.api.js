@@ -3,8 +3,8 @@ import axios from "axios";
 const TOKEN_KEY = "lazycv_token";
 
 const api = axios.create({
-    baseURL:"https://lazycv.onrender.com",
-    withCredentials:true
+    baseURL: import.meta.env.VITE_API_URL ?? "",
+    withCredentials: true
 })
 
 api.interceptors.request.use((config) => {
@@ -21,7 +21,7 @@ export const generateInterviewReport =async ({jobDescription , selfDescription ,
     const fromData = new FormData()
     fromData.append("jobDescription" , jobDescription)
     fromData.append("selfDescription",selfDescription)
-    fromData.append("resume",resumeFile)
+    if (resumeFile) fromData.append("resume",resumeFile)
 
  const response = await api.post("/api/interview",fromData ,{
       headers:{

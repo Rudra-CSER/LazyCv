@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import {AuthContext} from "../aut.context.jsx"
 import {InterviewContext} from "../../interview/interview.context.jsx"
-import {login,register ,logout} from "../services/auth.api.js"
+import {login,register,logout,verifyOtp} from "../services/auth.api.js"
 
 
 export const useAuth = () =>{
@@ -25,32 +25,60 @@ export const useAuth = () =>{
         }
 
 }
-/** handeling user Register State */
+/** handeling user Register State — now returns { requiresOtp, email } or false */
 const handelRegister = async ({username,email,password}) =>{
     setLoading(true)
-    const data = await register(username,email,password)
-    setUser(data.user)
-    setLoading(false)
+    try {
+        const data = await register(username,email,password)
+        // Backend no longer creates the user here; it sends an OTP
+        return { requiresOtp: data.requiresOtp, email: data.email }
+    } catch(error) {
+        console.log(error)
+        return false
+    } finally {
+        setLoading(false)
+    }
+}
+
+/** verify OTP and complete registration */
+const handelVerifyOtp = async ({email, otp}) => {
+    setLoading(true)
+    try {
+        const data = await verifyOtp(email, otp)
+        setUser(data.user)
+        return true
+    } catch(error) {
+        console.log(error)
+        return false
+    } finally {
+        setLoading(false)
+    }
 }
 
 
 /** handeling user Logout State */
 const handelLogout = async () =>{
     setLoading(true)
-    await logout()
-    setUser(null)
-    // Clear cached interview data so the next user never sees a previous user's reports
-    setReport(null)
-    setReports([])
-    setLoading(false)
+    try {
+        await logout()
+    } catch(error) {
+        console.log(error)
+    } finally {
+        setUser(null)
+        // Clear cached interview data so the next user never sees a previous user's reports
+        setReport(null)
+        setReports([])
+        setLoading(false)
+    }
 }
 
 
-return { 
+return {
     user,
     Loading,
     handelLogin,
     handelRegister,
+    handelVerifyOtp,
     handelLogout}
 }
 

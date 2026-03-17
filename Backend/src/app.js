@@ -10,14 +10,19 @@ const multer = require('multer');
 const authRouter = require('./routes/auth.routes');
 const interviewRouter = require('./routes/interview.routes');
 
-/*all the middlewares here */ 
+/*all the middlewares here */
 const app = express();
+const corsOptions = {
+    origin: (origin, cb) => cb(null, true),
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+};
+
+app.use(cors(corsOptions));
+
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors({
-    origin: (origin, cb) => cb(null, true),
-    credentials: true
-}))
 /*using all the routes here */      
 
 app.use('/api/auth', authRouter);
@@ -33,6 +38,13 @@ app.use((err, req, res, next) => {
         });
     }
     return next(err);
+});
+
+// Generic catch-all error handler — must be last
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ message: 'Internal server error' });
 });
 
 

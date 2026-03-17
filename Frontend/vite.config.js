@@ -8,7 +8,7 @@ export default defineConfig({
     open: '/login',
     proxy: {
       '/api': {
-        target: 'https://lazycv.onrender.com',
+        target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
