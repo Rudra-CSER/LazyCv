@@ -7,10 +7,10 @@ $bg-panel:     #131d18;
 $bg-textarea:  #0b1410;
 $bg-info:      #111e38;
 
-$accent:       #ff2d6e;
-$accent-glow:  rgba(#ff2d6e, 0.25);
 $green:        #00ff88;
+$green-d:      #00cc6a;
 $green-glow:   rgba(#00ff88, 0.18);
+$amber:        #f5a623;
 
 $text-primary: #e4ede8;
 $text-sub:     #8aaa98;
@@ -18,8 +18,6 @@ $text-muted:   #4e6b5c;
 $border:       #1c2b23;
 
 $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
-
-// Background is handled by AnimatedBackground canvas component
 
 // ── Page ────────────────────────────────────────────────
 .home {
@@ -33,53 +31,80 @@ $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
   justify-content: flex-start;
   padding: 0 1rem;
 
-  // ── Body — all content flows top-down, fits in one viewport ──
+  // ── Body — all content flows top-down ──
   &__body {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    gap: 1.25rem;
-    padding: clamp(1.25rem, 4vh, 2.5rem) 0 4.5rem;
+    gap: 1.5rem;
+    // top padding = navbar height + breathing room; bottom = fixed footer
+    padding-top: calc(64px + clamp(1.5rem, 4vh, 2.5rem));
+    padding-bottom: 5rem;
   }
 
   // ── Header ──────────────────────────────────────────
   &__header {
     text-align: center;
-    max-width: 700px;
+    max-width: 660px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+  }
 
-    h1 {
-      font-size: clamp(1.7rem, 3.6vw, 2.5rem);
-      font-weight: 700;
-      color: $text-primary;
-      line-height: 1.25;
-      letter-spacing: -0.5px;
-    }
+  &__header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $green;
+    background: rgba($green, 0.08);
+    border: 1px solid rgba($green, 0.25);
+    border-radius: 99px;
+    padding: 0.35rem 0.9rem;
+
+    i { font-size: 0.85rem; }
+  }
+
+  &__header h1 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: clamp(1.7rem, 3.6vw, 2.5rem);
+    font-weight: 800;
+    color: $text-primary;
+    line-height: 1.2;
+    letter-spacing: -0.04em;
+    margin: 0;
   }
 
   &__header-highlight {
-    color: $accent;
-    text-shadow: 0 0 28px rgba($accent, 0.45);
+    color: $green;
+    text-shadow: 0 0 40px rgba($green, 0.35);
   }
 
   &__header-sub {
-    margin-top: 0.65rem;
     color: $text-sub;
     font-size: 0.95rem;
     line-height: 1.65;
+    max-width: 520px;
+    margin: 0;
   }
 
   // ── Card ─────────────────────────────────────────────
   &__card {
     display: flex;
-    flex-direction: column;      // stack panels-row + footer
+    flex-direction: column;
     width: 100%;
     max-width: 980px;
     background: rgba($bg-card, 0.82);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     border: 1px solid rgba($border, 0.9);
+    border-top: 2px solid rgba($green, 0.25);
     border-radius: 1.1rem;
     overflow: hidden;
     box-shadow:
@@ -121,7 +146,7 @@ $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
 
   &__panel-icon {
     font-size: 1.1rem;
-    color: $text-sub;
+    color: $green;
   }
 
   &__panel-footer {
@@ -145,9 +170,9 @@ $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
     text-transform: uppercase;
 
     &--required {
-      background: rgba($accent, 0.12);
-      color: $accent;
-      border: 1px solid rgba($accent, 0.3);
+      background: rgba($amber, 0.12);
+      color: $amber;
+      border: 1px solid rgba($amber, 0.3);
     }
     &--best {
       background: rgba($green, 0.12);
@@ -183,21 +208,19 @@ $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
     &::placeholder { color: $text-muted; }
 
     &:focus {
-      border-color: rgba($accent, 0.45);
-      box-shadow: 0 0 0 3px rgba($accent, 0.08);
+      border-color: rgba($green, 0.45);
+      box-shadow: 0 0 0 3px rgba($green, 0.07);
     }
 
     &--profile {
       min-height: 95px;
-      border-color: rgba($accent, 0.4);
-      box-shadow: 0 0 0 2px rgba($accent, 0.07);
+      border-color: rgba($green, 0.2);
 
       &:focus {
-        border-color: $accent;
-        box-shadow: 0 0 0 3px rgba($accent, 0.14);
+        border-color: rgba($green, 0.5);
+        box-shadow: 0 0 0 3px rgba($green, 0.08);
       }
 
-      // ── Webkit custom scrollbar ────────────────────────
       &::-webkit-scrollbar        { width: 5px; }
       &::-webkit-scrollbar-track  { background: transparent; }
       &::-webkit-scrollbar-thumb  {
@@ -350,8 +373,8 @@ $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
     display: flex;
     align-items: center;
     gap: 0.45rem;
-    background: $accent;
-    color: #fff;
+    background: $green;
+    color: #080d0b;
     font-weight: 700;
     font-size: 0.93rem;
     border: none;
@@ -359,25 +382,29 @@ $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
     padding: 0.72rem 1.55rem;
     cursor: pointer;
     letter-spacing: 0.01em;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 22px rgba($accent, 0.38);
+    transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+    box-shadow: 0 4px 22px rgba($green, 0.28);
 
     i { font-size: 1.05rem; }
 
     &:hover {
-      background: color.adjust($accent, $lightness: 7%);
-      box-shadow: 0 6px 32px rgba($accent, 0.55);
+      background: $green-d;
+      box-shadow: 0 6px 32px rgba($green, 0.42);
       transform: translateY(-1px);
     }
-    &:active {
-      transform: scale(0.97);
+    &:active  { transform: scale(0.97); }
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
   }
 
   // ── Recent Reports — collapsible accordion ───────────
   &__reports {
     width: 100%;
-    max-width: 900px;
+    max-width: 980px;
     position: relative;
     z-index: 3;
   }
@@ -390,7 +417,7 @@ $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
     padding: 0.7rem 1rem;
     background: #141f19;
     border: 1px solid #2a4a35;
-    border-top: 3px solid $green;
+    border-top: 2px solid rgba($green, 0.35);
     border-radius: 10px;
     cursor: pointer;
     transition: border-color 0.18s, background 0.18s;
@@ -581,7 +608,7 @@ $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 2rem;
-    background: rgba(#0c1410, 0.72);
+    background: rgba(#0c1410, 0.75);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-top: 1px solid rgba($border, 0.5);
@@ -603,9 +630,7 @@ $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
         letter-spacing: 0.02em;
         transition: color 0.18s;
 
-        &:hover {
-          color: $green;
-        }
+        &:hover { color: $green; }
       }
     }
   }
@@ -629,9 +654,101 @@ $font-mono: 'Ubuntu Mono', 'Courier New', monospace;
     &__page-footer {
       padding: 0.65rem 1.2rem;
 
-      &-links {
-        gap: 1rem;
+      &-links { gap: 1rem; }
+    }
+  }
+
+  // ── Phone (≤ 480px) — bump up all sizes ──────────────
+  @media (max-width: 480px) {
+    padding: 0 0.75rem;
+
+    &__header-badge {
+      font-size: 0.76rem;
+      padding: 0.42rem 1rem;
+      i { font-size: 0.95rem; }
+    }
+
+    &__header h1 { font-size: clamp(1.55rem, 7vw, 2rem); }
+
+    &__header-sub { font-size: 0.9rem; }
+
+    &__panel { padding: 1.25rem; }
+
+    &__panel-header h2 { font-size: 1.05rem; }
+
+    &__panel-icon { font-size: 1.25rem; }
+
+    &__section-label {
+      font-size: 0.93rem;
+      i { font-size: 1.1rem; }
+    }
+
+    &__dropzone {
+      min-height: 110px;
+    }
+
+    &__dropzone-icon { font-size: 2.3rem; }
+
+    &__dropzone-text { font-size: 0.92rem; }
+
+    &__dropzone-sub  { font-size: 0.78rem; }
+
+    &__textarea {
+      font-size: 0.92rem;
+      min-height: 220px;
+    }
+
+    &__textarea--profile { min-height: 90px; }
+
+    &__badge {
+      font-size: 0.66rem;
+      padding: 3px 9px;
+    }
+
+    &__card-footer { padding: 0.9rem 1.25rem; }
+
+    &__footer-note {
+      font-size: 0.82rem;
+      i { font-size: 1rem; }
+    }
+
+    &__generate-btn {
+      font-size: 1rem;
+      padding: 0.82rem 1.5rem;
+      i { font-size: 1.1rem; }
+    }
+
+    // Reports section
+    &__reports-toggle {
+      padding: 0.85rem 1.1rem;
+      &-left {
+        i    { font-size: 1.1rem; }
+        span { font-size: 0.9rem; }
       }
     }
+
+    &__reports-chevron { font-size: 1.3rem; }
+
+    &__reports-count { font-size: 0.72rem; padding: 0.15rem 0.6rem; }
+
+    &__report-card { padding: 0.85rem 1rem; }
+
+    &__report-icon-wrap {
+      width: 36px;
+      height: 36px;
+      i { font-size: 1rem; }
+    }
+
+    &__report-title { font-size: 0.9rem; }
+
+    &__report-date {
+      font-size: 0.76rem;
+      i { font-size: 0.72rem; }
+    }
+
+    &__report-score-num { font-size: 0.9rem; }
+    &__report-score-tag { font-size: 0.62rem; }
+
+    &__report-arrow { font-size: 1.3rem; }
   }
 }

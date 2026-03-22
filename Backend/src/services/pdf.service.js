@@ -1,5 +1,77 @@
 const chromium = require("@sparticuz/chromium");
 const puppeteer = require("puppeteer-core");
+const fs = require("fs");
+const path = require("path");
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENV DETECTION
+// @sparticuz/chromium only works in serverless (Lambda/Linux) environments.
+// For local development, point Puppeteer at the system Chrome installation.
+// ─────────────────────────────────────────────────────────────────────────────
+function findLocalChrome() {
+  const platform = process.platform;
+  const candidates =
+    platform === "win32"
+      ? [
+          "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+          "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+          path.join(
+            process.env.LOCALAPPDATA || "",
+            "Google\\Chrome\\Application\\chrome.exe"
+          ),
+          path.join(
+            process.env.LOCALAPPDATA || "",
+            "Chromium\\Application\\chrome.exe"
+          ),
+        ]
+      : platform === "darwin"
+      ? ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
+      : [
+          "/usr/bin/google-chrome",
+          "/usr/bin/chromium-browser",
+          "/usr/bin/chromium",
+        ];
+
+  return candidates.find((p) => p && fs.existsSync(p)) || null;
+}
+
+async function getPuppeteerLaunchOptions() {
+  // Use @sparticuz/chromium when deployed (Render, Lambda, any Linux server).
+  // Fall back to local system Chrome only during Windows/macOS development.
+  const isDeployed =
+    process.env.NODE_ENV === "production" ||
+    !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    !!process.env.RENDER; // Render injects RENDER=true automatically
+
+  if (isDeployed) {
+    return {
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    };
+  }
+
+  const localChrome = findLocalChrome();
+  if (!localChrome) {
+    throw new Error(
+      "No Chrome/Chromium binary found for local development. " +
+        "Install Google Chrome or set NODE_ENV=production to use @sparticuz/chromium."
+    );
+  }
+
+  return {
+    executablePath: localChrome,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+    ],
+    headless: true,
+    defaultViewport: { width: 1280, height: 800 },
+  };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -489,32 +561,63 @@ ${fallbackHtml  ? section("Professional Background", fallbackHtml) : ""}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MAIN EXPORT
+// PUPPETEER HELPER — shared by both exports
 // ─────────────────────────────────────────────────────────────────────────────
-async function generatePdf(report) {
-  const data = typeof report.toObject === "function" ? report.toObject() : report;
-  const cv   = parseCvData(data);
-  const html = buildHtml(cv);
-
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath(),
-    headless: chromium.headless,
-  });
+async function htmlToPdf(html) {
+  const launchOptions = await getPuppeteerLaunchOptions();
+  const browser = await puppeteer.launch(launchOptions);
 
   try {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
-    const pdfBuffer = await page.pdf({
+
+    // ── Force single-page output ───────────────────────────────────────────
+    // A4 at 96 dpi = 794 x 1122 px. If the rendered content is taller,
+    // scale the whole body down so everything fits on exactly one page.
+    await page.evaluate(() => {
+      const A4_H = 1122;
+      const h = document.body.scrollHeight;
+      if (h > A4_H) {
+        const scale = A4_H / h;
+        document.body.style.transform = `scale(${scale})`;
+        document.body.style.transformOrigin = "top left";
+        document.body.style.width = `${Math.ceil(100 / scale)}%`;
+        document.body.style.overflow = "hidden";
+        document.body.style.height = `${A4_H}px`;
+      }
+    });
+
+    return await page.pdf({
       format: "A4",
       printBackground: true,
       margin: { top: "0", right: "0", bottom: "0", left: "0" },
     });
-    return pdfBuffer;
   } finally {
     await browser.close();
   }
 }
 
-module.exports = generatePdf;
+// ─────────────────────────────────────────────────────────────────────────────
+// EXPORTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * generatePdf(report)
+ * Legacy path: parses raw resumeText from a Mongoose report object.
+ */
+async function generatePdf(report) {
+  const data = typeof report.toObject === "function" ? report.toObject() : report;
+  const cv   = parseCvData(data);
+  return htmlToPdf(buildHtml(cv));
+}
+
+/**
+ * generatePdfFromCv(cv)
+ * AI-tailored path: accepts a pre-built cv object (from resume.service.js)
+ * and renders it directly into the same template — no re-parsing needed.
+ */
+async function generatePdfFromCv(cv) {
+  return htmlToPdf(buildHtml(cv));
+}
+
+module.exports = { generatePdf, generatePdfFromCv };

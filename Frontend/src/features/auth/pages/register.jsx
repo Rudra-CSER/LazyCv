@@ -38,7 +38,7 @@ const Register = () => {
     e.preventDefault();
     setOtpError(false);
     const success = await handelVerifyOtp({ email: pendingEmail, otp });
-    if (success) navigate("/");
+    if (success) navigate("/app");
     else setOtpError(true);
   };
 

@@ -53,15 +53,20 @@ export const useInterview = () => {
    const downloadPdf = async (interviewId) => {
     try {
         const blob = await downloadInterviewPdf(interviewId);
+        if (blob.type && blob.type !== "application/pdf") {
+            throw new Error("Server returned an error instead of a PDF");
+        }
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = `interview-report-${interviewId}.pdf`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
         return true;
     } catch (error) {
-        console.log(error);
+        console.error("PDF download error:", error);
         return false;
     }
    }

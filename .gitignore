@@ -35,3 +35,13 @@ Thumbs.db
 
 # ── Puppeteer local browser cache ────────────────────────
 .cache/puppeteer/
+
+# ── Dev tooling / AI assistance ──────────────────────────
+.mulch/
+CLAUDE.md
+
+# ── Developer notes ───────────────────────────────────────
+notes.md
+
+# ── Tests (not needed for website runtime) ────────────────
+tests/
