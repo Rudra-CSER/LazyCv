@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useState } from "react";
 import "../auth.from.scss";
 import { Link, useNavigate, Navigate } from "react-router";
 import { useAuth } from "../hooks/use.auth.js";

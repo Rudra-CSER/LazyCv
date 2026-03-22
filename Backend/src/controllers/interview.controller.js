@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const pdfParse = require('pdf-parse');
 const generateInterviewReport = require('../services/ai.service');
 const { generatePdf, generatePdfFromCv } = require('../services/pdf.service');
@@ -47,7 +48,6 @@ async function generateInterviewReportController(req, res) {
     console.error("Interview report generation error:", error);
     res.status(500).json({
       message: "Failed to generate interview report",
-      error: error.message,
     });
   }
 }
@@ -58,6 +58,9 @@ async function generateInterviewReportController(req, res) {
 async function generateInterviewReportByIdController(req, res) {
   try {
     const { interviewId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(interviewId)) {
+      return res.status(404).json({ message: "Interview report not found" });
+    }
     const interviewReport = await interViewReportModel.findOne({ _id: interviewId, user: req.user.id });
 
     if (!interviewReport) {
@@ -70,7 +73,7 @@ async function generateInterviewReportByIdController(req, res) {
     });
   } catch (error) {
     console.error("Get report by ID error:", error);
-    res.status(500).json({ message: "Failed to fetch interview report", error: error.message });
+    res.status(500).json({ message: "Failed to fetch interview report" });
   }
 }
 
@@ -90,7 +93,7 @@ async function generateInterviewReportsController(req, res) {
     });
   } catch (error) {
     console.error("Get all reports error:", error);
-    res.status(500).json({ message: "Failed to fetch interview reports", error: error.message });
+    res.status(500).json({ message: "Failed to fetch interview reports" });
   }
 }
 
@@ -109,6 +112,9 @@ async function generateInterviewReportsController(req, res) {
 async function downloadInterviewPdfController(req, res) {
   try {
     const { interviewId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(interviewId)) {
+      return res.status(404).json({ message: "Interview report not found" });
+    }
     const interviewReport = await interViewReportModel.findOne({ _id: interviewId, user: req.user.id });
 
     if (!interviewReport) {
@@ -143,7 +149,7 @@ async function downloadInterviewPdfController(req, res) {
     res.send(pdfBuffer);
   } catch (error) {
     console.error("PDF generation error:", error);
-    res.status(500).json({ message: "Failed to generate PDF", error: error.message });
+    res.status(500).json({ message: "Failed to generate PDF" });
   }
 }
 
