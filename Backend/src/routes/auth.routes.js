@@ -13,6 +13,13 @@ const authRouter = Router();
 
 authRouter.post("/register", authController.registerUserController)
 
+/**
+ * @route POST /api/auth/verify-otp
+ * @desc Verify OTP and complete user registration
+ * @access Public
+ */
+authRouter.post("/verify-otp", authController.verifyOtpController)
+
 
 
 

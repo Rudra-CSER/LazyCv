@@ -79,3 +79,45 @@ Feature-based 4-layer architecture (documented in `notes.md`):
 - `remixicon` for icons
 - Resume upload uses `multipart/form-data`; the field name must be `"resume"` (matched by `upload.single("resume")` in the backend)
 - The AI service uses `zod` + `zod-to-json-schema` to enforce a strict output schema from OpenAI; `skillGaps` is stored as `Mixed` in Mongoose because the AI occasionally returns a single object instead of an array
+
+<!-- mulch:start -->
+## Project Expertise (Mulch)
+<!-- mulch-onboard-v:1 -->
+
+This project uses [Mulch](https://github.com/jayminwest/mulch) for structured expertise management.
+
+**At the start of every session**, run:
+```bash
+mulch prime
+```
+
+This injects project-specific conventions, patterns, decisions, and other learnings into your context.
+Use `mulch prime --files src/foo.ts` to load only records relevant to specific files.
+
+**Before completing your task**, review your work for insights worth preserving — conventions discovered,
+patterns applied, failures encountered, or decisions made — and record them:
+```bash
+mulch record <domain> --type <convention|pattern|failure|decision|reference|guide> --description "..."
+```
+
+Link evidence when available: `--evidence-commit <sha>`, `--evidence-bead <id>`
+
+Run `mulch status` to check domain health and entry counts.
+Run `mulch --help` for full usage.
+Mulch write commands use file locking and atomic writes — multiple agents can safely record to the same domain concurrently.
+
+### Before You Finish
+
+1. Discover what to record:
+   ```bash
+   mulch learn
+   ```
+2. Store insights from this work session:
+   ```bash
+   mulch record <domain> --type <convention|pattern|failure|decision|reference|guide> --description "..."
+   ```
+3. Validate and commit:
+   ```bash
+   mulch sync
+   ```
+<!-- mulch:end -->

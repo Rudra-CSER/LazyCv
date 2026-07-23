@@ -1,10 +1,17 @@
 import axios from "axios";
 
+const TOKEN_KEY = "lazycv_token";
 
 const api = axios.create({
-    baseURL:"",
-    withCredentials:true
+    baseURL: import.meta.env.VITE_API_URL ?? "https://lazycv.onrender.com",
+    withCredentials: true
 })
+
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+});
 
 /**
  * 
@@ -14,7 +21,7 @@ export const generateInterviewReport =async ({jobDescription , selfDescription ,
     const fromData = new FormData()
     fromData.append("jobDescription" , jobDescription)
     fromData.append("selfDescription",selfDescription)
-    fromData.append("resume",resumeFile)
+    if (resumeFile) fromData.append("resume",resumeFile)
 
  const response = await api.post("/api/interview",fromData ,{
       headers:{

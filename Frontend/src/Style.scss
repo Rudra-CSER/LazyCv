@@ -1,50 +1,216 @@
 @use "./styles/button.scss";
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-html, body,#root{
-    width: 100%;
-    height: 100%;
-    background: #080d0b;
-    font-family: 'Poppins', sans-serif;
-    color: aliceblue;
-}
-.highlight{
-    color: #00ff8895;
-}
 
-// ── Global webkit scrollbar ────────────────────────────────────────
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 255, 136, 0.35),
-    rgba(0, 229, 255, 0.2)
-  );
-  border-radius: 999px;
-  border: 1px solid rgba(0, 255, 136, 0.08);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 255, 136, 0.65),
-    rgba(0, 229, 255, 0.45)
-  );
-}
-::-webkit-scrollbar-corner {
-  background: transparent;
-}
+// ── Tokens ────────────────────────────────────────────────
+$bg-page:  #080d0b;
+$bg-card:  #0f1813;
+$green:    #00ff88;
+$green-d:  #00cc6a;
+$border:   #1c2b23;
+$text:     #e4ede8;
+$text-sub: #8aaa98;
+$text-dim: #4e6b5c;
 
-// Explicit page-level scrollbar (document scroll on html/body)
+// ── Reset ─────────────────────────────────────────────────
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  background: $bg-page;
+  font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+  color: $text;
+}
+.highlight { color: rgba($green, 0.58); }
+
+// Hide the native scrollbar globally
+::-webkit-scrollbar { display: none; }
 html {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 255, 136, 0.35) transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+// ── App Navbar (shared by /app and /interview/:id) ─────────
+.app-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2.5rem;
+  height: 64px;
+  background: rgba($bg-page, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba($border, 0.6);
+
+  // ── Brand (home page) ──
+  &__brand {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 1.18rem;
+    font-weight: 900;
+    color: $green;
+    letter-spacing: -0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    text-shadow: 0 0 24px rgba($green, 0.35);
+    svg { filter: drop-shadow(0 0 8px rgba($green, 0.6)); }
+  }
+
+  // ── Back button (interview page) ──
+  &__back {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: $text-sub;
+    background: none;
+    border: 1px solid rgba($border, 0.9);
+    border-radius: 0.5rem;
+    padding: 0.42rem 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    white-space: nowrap;
+
+    i { font-size: 1rem; }
+
+    &:hover {
+      color: $text;
+      border-color: rgba($green, 0.35);
+      background: rgba($green, 0.05);
+    }
+  }
+
+  // ── Center pill label ──
+  &__pill {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $green;
+    background: rgba($green, 0.08);
+    border: 1px solid rgba($green, 0.22);
+    border-radius: 99px;
+    padding: 0.32rem 0.9rem;
+    white-space: nowrap;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    i { font-size: 0.85rem; flex-shrink: 0; }
+  }
+
+  // ── Right actions wrapper ──
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  // ── User chip (home page) ──
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: $text-sub;
+    padding: 0.42rem 0.9rem;
+    background: rgba($bg-card, 0.6);
+    border: 1px solid rgba($border, 0.9);
+    border-radius: 0.5rem;
+    i { font-size: 0.95rem; color: $green; }
+  }
+
+  // ── Sign-out button (home page) ──
+  &__logout {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: $text-sub;
+    background: none;
+    border: 1px solid rgba($border, 0.9);
+    border-radius: 0.5rem;
+    padding: 0.42rem 1rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    i { font-size: 0.95rem; }
+    &:hover {
+      color: $text;
+      border-color: rgba($green, 0.35);
+      background: rgba($green, 0.05);
+    }
+  }
+
+  // ── Download button (interview page) ──
+  &__dl-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: $bg-page;
+    background: $green;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.42rem 1rem;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+    i { font-size: 0.95rem; }
+
+    &:hover:not(:disabled) {
+      background: $green-d;
+      box-shadow: 0 0 18px rgba($green, 0.35);
+    }
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    &--loading { opacity: 0.7; cursor: not-allowed; }
+  }
+
+  // ── Responsive ──
+  @media (max-width: 640px) {
+    padding: 0 1rem;
+
+    &__pill { display: none; }
+
+    &__back span,
+    &__logout span,
+    &__user span { display: none; }
+
+    // Larger tap targets + bigger icons on mobile
+    &__back,
+    &__logout {
+      padding: 0.62rem 0.8rem;
+      i { font-size: 1.25rem; }
+    }
+
+    &__user {
+      padding: 0.62rem 0.8rem;
+      i { font-size: 1.25rem; }
+    }
+
+    &__dl-btn {
+      padding: 0.62rem 0.8rem;
+      i { font-size: 1.25rem; }
+      span { display: none; }
+    }
+  }
 }

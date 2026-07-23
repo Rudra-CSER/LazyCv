@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useInterview } from "../hooks/useinterview";
 import "../style/interview.scss";
 import "remixicon/fonts/remixicon.css";
@@ -59,13 +59,9 @@ const MOCK_REPORT = {
 };
 
 const SECTIONS = [
-  {
-    key: "technical",
-    label: "Technical Questions",
-    icon: "ri-code-s-slash-line",
-  },
-  { key: "behavioral", label: "Behavioral Questions", icon: "ri-chat-3-line" },
-  { key: "roadmap", label: "Road Map", icon: "ri-map-2-line" },
+  { key: "technical",  label: "Technical",  icon: "ri-code-s-slash-line" },
+  { key: "behavioral", label: "Behavioral", icon: "ri-chat-3-line" },
+  { key: "roadmap",    label: "Road Map",   icon: "ri-map-2-line" },
 ];
 
 const severityClass = (s) =>
@@ -77,14 +73,13 @@ const scoreTag = (n) =>
   n >= 50 ? ["Moderate",  "tag--moderate"]  :
             ["Needs Work","tag--low"];
 
-// ── Left sidebar nav ──────────────────────────────────────────────────
-const Sidebar = ({ report, activeSection, setActiveSection, setExpandedIdx, onDownload, downloading }) => {
-  const circumference = 2 * Math.PI * 38; // r=38 → ≈238.76
+// ── Left sidebar nav ──────────────────────────────────────
+const Sidebar = ({ report, activeSection, setActiveSection, setExpandedIdx }) => {
+  const circumference = 2 * Math.PI * 38;
   const [label, tagClass] = scoreTag(report.matchScore);
 
   return (
     <aside className="iv__sidebar">
-
       {report.title && (
         <div className="iv__sidebar-title">
           <i className="ri-briefcase-4-line" />
@@ -129,22 +124,11 @@ const Sidebar = ({ report, activeSection, setActiveSection, setExpandedIdx, onDo
           </button>
         ))}
       </nav>
-
-      <button
-        className={`iv__download-btn${downloading ? " iv__download-btn--loading" : ""}`}
-        onClick={onDownload}
-        disabled={downloading}
-      >
-        {downloading
-          ? <><i className="ri-loader-4-line iv__download-spin" /> Generating PDF…</>
-          : <><i className="ri-download-2-line" /> Download PDF</>}
-      </button>
-
     </aside>
   );
 };
 
-// ── Centre content ────────────────────────────────────────────────────
+// ── Centre content ─────────────────────────────────────────
 const Content = ({ report, activeSection, expandedIdx, toggleExpand }) => {
   if (activeSection === "technical" && report.technicalQuestions) {
     return (
@@ -161,15 +145,10 @@ const Content = ({ report, activeSection, expandedIdx, toggleExpand }) => {
               key={i}
               className={`iv__qa-card${expandedIdx === i ? " iv__qa-card--open" : ""}`}
             >
-              <button
-                className="iv__qa-header"
-                onClick={() => toggleExpand(i)}
-              >
+              <button className="iv__qa-header" onClick={() => toggleExpand(i)}>
                 <span className="iv__qa-num">Q{i + 1}</span>
                 <span className="iv__qa-q">{q.question}</span>
-                <i
-                  className={`iv__qa-chevron ${expandedIdx === i ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}`}
-                />
+                <i className={`iv__qa-chevron ${expandedIdx === i ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}`} />
               </button>
               {expandedIdx === i && (
                 <div className="iv__qa-body">
@@ -201,15 +180,10 @@ const Content = ({ report, activeSection, expandedIdx, toggleExpand }) => {
               key={i}
               className={`iv__qa-card${expandedIdx === i ? " iv__qa-card--open" : ""}`}
             >
-              <button
-                className="iv__qa-header"
-                onClick={() => toggleExpand(i)}
-              >
+              <button className="iv__qa-header" onClick={() => toggleExpand(i)}>
                 <span className="iv__qa-num">B{i + 1}</span>
                 <span className="iv__qa-q">{q.question}</span>
-                <i
-                  className={`iv__qa-chevron ${expandedIdx === i ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}`}
-                />
+                <i className={`iv__qa-chevron ${expandedIdx === i ? "ri-arrow-up-s-line" : "ri-arrow-down-s-line"}`} />
               </button>
               {expandedIdx === i && (
                 <div className="iv__qa-body">
@@ -228,12 +202,8 @@ const Content = ({ report, activeSection, expandedIdx, toggleExpand }) => {
 
   if (activeSection === "roadmap" && report.preparationPlan) {
     const DAY_ICONS = [
-      "ri-book-open-line",
-      "ri-server-line",
-      "ri-speed-line",
-      "ri-layout-4-line",
-      "ri-test-tube-line",
-      "ri-building-2-line",
+      "ri-book-open-line", "ri-server-line", "ri-speed-line",
+      "ri-layout-4-line",  "ri-test-tube-line", "ri-building-2-line",
       "ri-presentation-line",
     ];
     const total = report.preparationPlan.length;
@@ -273,7 +243,7 @@ const Content = ({ report, activeSection, expandedIdx, toggleExpand }) => {
   return null;
 };
 
-// ── Right panel: Skill Gaps ───────────────────────────────────────────
+// ── Right panel: Skill Gaps ────────────────────────────────
 const GAP_ICON = { high: "ri-alarm-warning-line", medium: "ri-alert-line", low: "ri-information-line" };
 
 const SkillGaps = ({ report }) => (
@@ -301,9 +271,10 @@ const SkillGaps = ({ report }) => (
   </aside>
 );
 
-// ── Component ──────────────────────────────────────────────────────────────
+// ── Component ───────────────────────────────────────────────
 const Interview = () => {
   const { interviewId } = useParams();
+  const navigate = useNavigate();
   const { report, loading, getReportById, downloadPdf } = useInterview();
   const [activeSection, setActiveSection] = useState("technical");
   const [expandedIdx, setExpandedIdx] = useState(null);
@@ -315,7 +286,7 @@ const Interview = () => {
     setFetchDone(false);
     getReportById(interviewId).finally(() => setFetchDone(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [interviewId]); // getReportById intentionally omitted — only re-fetch on ID change
+  }, [interviewId]);
 
   const activeReport = interviewId === "xyz" ? MOCK_REPORT : report;
   const toggleExpand = (i) => setExpandedIdx(expandedIdx === i ? null : i);
@@ -323,17 +294,43 @@ const Interview = () => {
   const handleDownloadPdf = async () => {
     if (interviewId === "xyz") return alert("PDF download is not available for the preview report.");
     setDownloading(true);
-    await downloadPdf(interviewId);
+    const success = await downloadPdf(interviewId);
     setDownloading(false);
+    if (!success) alert("Failed to generate PDF. Please try again.");
   };
 
   if (!fetchDone || loading) return <WizardLoader text="Loading your report" sub="Fetching your interview plan" />;
   if (!activeReport) return <main><h1>Report not found</h1></main>;
 
-  // ── Layout ────────────────────────────────────────────────────────────
   return (
     <main className="iv">
       <AnimatedBackground />
+
+      {/* ── App Navbar ── */}
+      <nav className="app-nav">
+        <button className="app-nav__back" onClick={() => navigate("/app")}>
+          <i className="ri-arrow-left-line" />
+          <span>Dashboard</span>
+        </button>
+
+        {activeReport.title && (
+          <span className="app-nav__pill">
+            <i className="ri-briefcase-4-line" />
+            {activeReport.title}
+          </span>
+        )}
+
+        <div className="app-nav__right">
+          <button
+            className={`app-nav__dl-btn${downloading ? " app-nav__dl-btn--loading" : ""}`}
+            onClick={handleDownloadPdf}
+            disabled={downloading}
+          >
+            <i className={downloading ? "ri-loader-4-line iv__spin" : "ri-download-2-line"} />
+            <span>{downloading ? "Generating…" : "Download PDF"}</span>
+          </button>
+        </div>
+      </nav>
 
       <div className="iv__shell">
         <Sidebar
@@ -341,8 +338,6 @@ const Interview = () => {
           activeSection={activeSection}
           setActiveSection={setActiveSection}
           setExpandedIdx={setExpandedIdx}
-          onDownload={handleDownloadPdf}
-          downloading={downloading}
         />
 
         <section className="iv__center">

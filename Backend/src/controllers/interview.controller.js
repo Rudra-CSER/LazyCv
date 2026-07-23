@@ -1,6 +1,8 @@
+const mongoose = require('mongoose');
 const pdfParse = require('pdf-parse');
 const generateInterviewReport = require('../services/ai.service');
-const generatePdf = require('../services/pdf.service');
+const { generatePdf, generatePdfFromCv } = require('../services/pdf.service');
+const { generateTailoredResume, structuredToCv } = require('../services/resume.service');
 const interViewReportModel = require('../models/interviewReport.model');
 
 /**
@@ -46,7 +48,6 @@ async function generateInterviewReportController(req, res) {
     console.error("Interview report generation error:", error);
     res.status(500).json({
       message: "Failed to generate interview report",
-      error: error.message,
     });
   }
 }
@@ -57,6 +58,9 @@ async function generateInterviewReportController(req, res) {
 async function generateInterviewReportByIdController(req, res) {
   try {
     const { interviewId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(interviewId)) {
+      return res.status(404).json({ message: "Interview report not found" });
+    }
     const interviewReport = await interViewReportModel.findOne({ _id: interviewId, user: req.user.id });
 
     if (!interviewReport) {
@@ -69,7 +73,7 @@ async function generateInterviewReportByIdController(req, res) {
     });
   } catch (error) {
     console.error("Get report by ID error:", error);
-    res.status(500).json({ message: "Failed to fetch interview report", error: error.message });
+    res.status(500).json({ message: "Failed to fetch interview report" });
   }
 }
 
@@ -89,31 +93,63 @@ async function generateInterviewReportsController(req, res) {
     });
   } catch (error) {
     console.error("Get all reports error:", error);
-    res.status(500).json({ message: "Failed to fetch interview reports", error: error.message });
+    res.status(500).json({ message: "Failed to fetch interview reports" });
   }
 }
 
 /**
- * @description Controller to generate and stream a PDF of the interview report
+ * @description Download a job-tailored resume PDF.
+ *
+ * Flow:
+ *  1. Fetch the saved interview report (resumeText, jobDescription, selfDescription, title).
+ *  2. Call OpenAI to rewrite the resume content so it is optimised for that specific job.
+ *  3. Convert the structured AI output to the cv object the PDF template expects.
+ *  4. Render and stream the A4 PDF using the existing template in pdf.service.js.
+ *
+ * If the AI call fails for any reason we fall back to the original raw-text render
+ * so the user always gets a downloadable file.
  */
 async function downloadInterviewPdfController(req, res) {
   try {
     const { interviewId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(interviewId)) {
+      return res.status(404).json({ message: "Interview report not found" });
+    }
     const interviewReport = await interViewReportModel.findOne({ _id: interviewId, user: req.user.id });
 
     if (!interviewReport) {
       return res.status(404).json({ message: "Interview report not found" });
     }
 
-    const pdfBuffer = await generatePdf(interviewReport);
+    const report = typeof interviewReport.toObject === "function"
+      ? interviewReport.toObject()
+      : interviewReport;
+
+    let pdfBuffer;
+
+    try {
+      // ── AI-tailored path ────────────────────────────────────────────────
+      const tailored = await generateTailoredResume(
+        report.resumeText,
+        report.jobDescription,
+        report.selfDescription,
+        report.title,
+      );
+      const cv = structuredToCv(tailored, report);
+      pdfBuffer = await generatePdfFromCv(cv);
+    } catch (aiErr) {
+      // ── Fallback: raw resume text → template (no AI tailoring) ──────────
+      console.warn("AI tailoring failed, falling back to raw resume render:", aiErr.message);
+      pdfBuffer = await generatePdf(report);
+    }
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="interview-report-${interviewId}.pdf"`);
+    res.setHeader("Content-Disposition", `attachment; filename="resume-${interviewId}.pdf"`);
     res.setHeader("Content-Length", pdfBuffer.length);
     res.send(pdfBuffer);
   } catch (error) {
     console.error("PDF generation error:", error);
-    res.status(500).json({ message: "Failed to generate PDF", error: error.message });
+    res.status(500).json({ message: "Failed to generate PDF" });
   }
 }
 

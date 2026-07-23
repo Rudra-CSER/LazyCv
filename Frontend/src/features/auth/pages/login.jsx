@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useState } from "react";
 import "../auth.from.scss";
 import { Link, useNavigate, Navigate } from "react-router";
 import { useAuth } from "../hooks/use.auth.js";
@@ -15,7 +15,7 @@ const Login = () => {
     e.preventDefault();
     setLoginError(false);
     const success = await handelLogin({ email, password });
-    if (success) navigate("/");
+    if (success) navigate("/app");
     else setLoginError(true);
   };
 
@@ -28,7 +28,7 @@ const Login = () => {
     );
   }
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/app" replace />;
   return (
     <main className="auth-page">
       <AnimatedBackground variant="auth" />
