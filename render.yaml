@@ -3,8 +3,25 @@ services:
     name: lazycv-backend
     runtime: node
     rootDir: Backend
-    buildCommand: npm install
+    buildCommand: npm ci
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: OPENAI_KEY
+        sync: false
+      - key: FRONTEND_ORIGINS
+        sync: false
+
+staticSites:
+  - name: lazycv-frontend
+    rootDir: Frontend
+    buildCommand: npm ci && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false

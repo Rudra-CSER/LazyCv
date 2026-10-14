@@ -1,123 +1,70 @@
-name: CD — Production Deploy (Docker + VPS)
+name: CD — Production Deploy (Render)
 
 on:
   push:
     branches: [production]
 
-env:
-  REGISTRY: ghcr.io
-  BACKEND_IMAGE:  ghcr.io/rudra-cser/lazycv-backend
-  FRONTEND_IMAGE: ghcr.io/rudra-cser/lazycv-frontend
-
 jobs:
-  # ────────────────────────────────────────────────────────
-  # Build & push Docker images to GitHub Container Registry
-  # ────────────────────────────────────────────────────────
-  build-and-push:
-    name: Build & Push Docker Images
+  trigger-render-deploy:
+    name: Trigger Render Deploy Hooks
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write   # needed to push to ghcr.io
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Trigger backend deploy hook
+        env:
+          BACKEND_DEPLOY_HOOK: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
+        run: |
+          test -n "$BACKEND_DEPLOY_HOOK" || (echo "Missing RENDER_BACKEND_DEPLOY_HOOK secret" && exit 1)
+          curl -fsS -X POST "$BACKEND_DEPLOY_HOOK"
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}   # auto-provided by GitHub
+      - name: Trigger frontend deploy hook
+        env:
+          FRONTEND_DEPLOY_HOOK: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}
+        run: |
+          test -n "$FRONTEND_DEPLOY_HOOK" || (echo "Missing RENDER_FRONTEND_DEPLOY_HOOK secret" && exit 1)
+          curl -fsS -X POST "$FRONTEND_DEPLOY_HOOK"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build & push Backend image
-        uses: docker/build-push-action@v5
-        with:
-          context:   ./Backend
-          file:      ./Backend/Dockerfile
-          push:      true
-          tags:      ${{ env.BACKEND_IMAGE }}:latest,${{ env.BACKEND_IMAGE }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to:   type=gha,mode=max
-
-      - name: Build & push Frontend image
-        uses: docker/build-push-action@v5
-        with:
-          context:   ./Frontend
-          file:      ./Frontend/Dockerfile
-          push:      true
-          tags:      ${{ env.FRONTEND_IMAGE }}:latest,${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to:   type=gha,mode=max
-
-  # ────────────────────────────────────────────────────────
-  # SSH into VPS and pull + restart containers
-  # ────────────────────────────────────────────────────────
-  deploy-to-vps:
-    name: Deploy to VPS
-    runs-on: ubuntu-latest
-    needs: build-and-push
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Copy docker-compose.yml to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host:     ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key:      ${{ secrets.VPS_SSH_KEY }}
-          source:   docker-compose.yml
-          target:   /opt/lazycv
-
-      - name: Pull new images & restart containers
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host:     ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key:      ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            cd /opt/lazycv
-
-            # Log in to ghcr.io on the VPS (uses a Personal Access Token)
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u rudra-cser --password-stdin
-
-            # Pull latest images
-            docker compose pull
-
-            # Restart with zero-downtime rolling update
-            docker compose up -d --remove-orphans
-
-            # Clean up old dangling images
-            docker image prune -f
-
-  # ────────────────────────────────────────────────────────
-  # Post-deploy health check
-  # ────────────────────────────────────────────────────────
   post-deploy-check:
     name: Post-Deploy Health Check
     runs-on: ubuntu-latest
-    needs: deploy-to-vps
+    needs: trigger-render-deploy
 
     steps:
-      - name: Wait 15 s for containers to start
-        run: sleep 15
+      - name: Wait for Render deployment
+        run: sleep 60
 
-      - name: Check backend health (401 = server is up, auth working)
+      - name: Check backend health (expect 401 without cookie)
+        env:
+          RENDER_BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL }}
         run: |
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            http://${{ secrets.VPS_HOST }}/api/auth/me)
-          [ "$CODE" = "401" ] \
-            && echo "✓ Backend healthy (got expected 401)" \
-            || (echo "✗ Backend unreachable — got $CODE" && exit 1)
+          test -n "$RENDER_BACKEND_URL" || (echo "Missing RENDER_BACKEND_URL secret" && exit 1)
+          for i in {1..20}; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              "$RENDER_BACKEND_URL/api/auth/get-me")
+            if [ "$CODE" = "401" ]; then
+              echo "✓ Backend healthy (got expected 401)"
+              exit 0
+            fi
+            echo "Backend not ready yet (status $CODE), retry $i/20"
+            sleep 15
+          done
+          echo "✗ Backend failed health check"
+          exit 1
 
       - name: Check frontend is serving
+        env:
+          RENDER_FRONTEND_URL: ${{ secrets.RENDER_FRONTEND_URL }}
         run: |
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            http://${{ secrets.VPS_HOST }})
-          [ "$CODE" = "200" ] \
-            && echo "✓ Frontend healthy" \
-            || (echo "✗ Frontend unreachable — got $CODE" && exit 1)
+          test -n "$RENDER_FRONTEND_URL" || (echo "Missing RENDER_FRONTEND_URL secret" && exit 1)
+          for i in {1..20}; do
+            CODE=$(curl -L -s -o /dev/null -w "%{http_code}" \
+              "$RENDER_FRONTEND_URL")
+            if [ "$CODE" = "200" ]; then
+              echo "✓ Frontend healthy"
+              exit 0
+            fi
+            echo "Frontend not ready yet (status $CODE), retry $i/20"
+            sleep 15
+          done
+          echo "✗ Frontend failed health check"
+          exit 1

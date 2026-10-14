@@ -12,8 +12,17 @@ const interviewRouter = require('./routes/interview.routes');
 
 /*all the middlewares here */
 const app = express();
+const allowedOrigins = (process.env.FRONTEND_ORIGINS || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 const corsOptions = {
-    origin: (origin, cb) => cb(null, true),
+    origin: (origin, cb) => {
+        if (!origin) return cb(null, true);
+        if (allowedOrigins.includes(origin)) return cb(null, true);
+        return cb(new Error('CORS origin not allowed'));
+    },
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
