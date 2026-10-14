@@ -4,6 +4,8 @@ on:
   push:
     branches: [production]
 
+permissions: {}
+
 jobs:
   trigger-render-deploy:
     name: Trigger Render Deploy Hooks
